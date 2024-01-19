@@ -15,9 +15,11 @@
 
 """Utilities to generate classes of normal-form game payoff tensors."""
 
-from typing import Optional, Sequence, Tuple
-
+import enum
+from typing import Any, Mapping, Optional, Sequence, Tuple
+from absl import logging
 import jax
+from jax.experimental import mesh_utils
 import jax.numpy as jnp
 
 
@@ -179,3 +181,49 @@ def empirical_disc_game(
   joint_mask = _random_joint_mask(key_m, num_strategies, joint_action_keep_prob)
   payoffs = _empirical_disc_game(key_p, num_strategies, latent_size=latent_size)
   return payoffs, joint_mask
+
+
+class Game(enum.Enum):
+  L2_INVARIANT = enum.auto()
+  EMPIRICAL_DISC_GAME = enum.auto()
+
+
+def generate_payoffs(
+    game: Game,
+    game_settings: Mapping[str, Any],
+    num_strategies: Sequence[int],
+    batch_size: int,
+):
+  """Returns a function that generates (batches of) payoff tensors."""
+
+  @jax.jit
+  def _generate_payoff(key):
+    if game == Game.L2_INVARIANT:
+      payoffs, mask = l2_invariant(key, num_strategies, **game_settings)
+    elif game == Game.EMPIRICAL_DISC_GAME:
+      payoffs, mask = empirical_disc_game(key, num_strategies, **game_settings)
+    else:
+      raise ValueError(f'Unrecognised game type: {game}.')
+    return payoffs, mask
+
+  num_devices = len(jax.local_devices())
+  devices = mesh_utils.create_device_mesh((num_devices, 1))
+  sharding = jax.sharding.PositionalSharding(devices)
+  logging.info('Mesh: %s\nSharding: %s %s', devices, sharding, sharding.shape)
+
+  @jax.jit
+  def _generate_payoffs(key):
+    key, next_key = jax.random.split(key)
+    keys = jax.random.split(key, batch_size)
+    keys = jax.lax.with_sharding_constraint(keys, sharding)
+    payoffs, masks = jax.jit(jax.vmap(_generate_payoff))(keys)
+    payoffs, masks = jax.lax.with_sharding_constraint(
+        (payoffs, masks),
+        (
+            sharding.reshape((num_devices, 1) + (1,) * len(num_strategies)),
+            sharding.reshape((num_devices,) + (1,) * len(num_strategies)),
+        ),
+    )
+    return (payoffs, masks), next_key
+
+  return _generate_payoffs

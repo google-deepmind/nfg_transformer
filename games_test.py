@@ -52,6 +52,18 @@ class GamesTest(parameterized.TestCase):
     np.testing.assert_allclose(mask, mask.T)
     np.testing.assert_allclose(payoffs.sum(0), 1.0)
 
+  @parameterized.parameters(
+      (games.Game.L2_INVARIANT, (3, 4)),
+      (games.Game.L2_INVARIANT, (3, 4, 5)),
+      (games.Game.EMPIRICAL_DISC_GAME, (3, 3)),
+  )
+  def test_generate_payoffs(self, game, num_strategies):
+    generate_payoffs = games.generate_payoffs(game, {}, num_strategies, 4)
+    key = jax.random.PRNGKey(42)
+    (payoffs, masks), _ = generate_payoffs(key)
+    self.assertEqual(payoffs.shape, (4, len(num_strategies)) + num_strategies)
+    self.assertEqual(masks.shape, (4,) + num_strategies)
+
 
 if __name__ == "__main__":
   absltest.main()
