@@ -17,11 +17,12 @@
 
 from typing import Optional, Sequence
 
-import attention as attn
 import haiku as hk
 import jax
 import jax.numpy as jnp
 import numpy as np
+
+from nfg_transformer import attention
 
 
 def _to_joint_actions(action_embeddings: Sequence[jnp.ndarray]) -> jnp.ndarray:
@@ -73,7 +74,7 @@ class NfgTransformerBlock(hk.Module):
     actions = _to_joint_actions(action_embeddings_tm1)  # [N, T1, ..., TN, E]
     action_value = jnp.concatenate([actions, payoffs[..., jnp.newaxis]], -1)
     action_value = jax.nn.gelu(
-        attn.conv_1d(num_channels, name="action_value")(action_value)
+        attention.conv_1d(num_channels, name="action_value")(action_value)
     )
     action_value = jnp.reshape(action_value, [num_players, -1, num_channels])
     attention_mask = jnp.reshape(mask, [num_players, -1, 1])
@@ -81,7 +82,7 @@ class NfgTransformerBlock(hk.Module):
         attention_mask, attention_mask
     )
     player_to_joint = jax.vmap(
-        attn.SelfAttention(
+        attention.SelfAttention(
             num_heads=self._num_heads,
             qk_channels=self._qk_channels,
             v_channels=self._v_channels,
@@ -97,7 +98,7 @@ class NfgTransformerBlock(hk.Module):
     # Action to play: each player action attends to all joint-actions to which
     # it has participated.
     cross_attention = jax.vmap(
-        attn.CrossAttention(
+        attention.CrossAttention(
             num_heads=self._num_heads,
             qk_channels=self._qk_channels,
             v_channels=self._v_channels,
@@ -135,7 +136,7 @@ class NfgTransformerBlock(hk.Module):
     action_mask = jnp.concatenate(action_masks, axis=0)
     qkv_mask = jnp.outer(action_mask, action_mask)
     for _ in range(self._num_self_attend_per_block):
-      action_embeddings = attn.SelfAttention(
+      action_embeddings = attention.SelfAttention(
           num_heads=self._num_heads,
           qk_channels=self._qk_channels,
           v_channels=self._v_channels,
@@ -214,7 +215,7 @@ class NfgTransformer(hk.Module):
       action_embeddings = block(payoffs, action_embeddings, mask)
 
     action_embeddings = [
-        attn.layer_norm(embeddings, f"layer_norm_final_{p}")
+        attention.layer_norm(embeddings, f"layer_norm_final_{p}")
         for p, embeddings in enumerate(action_embeddings)
     ]
     return action_embeddings
@@ -244,7 +245,7 @@ class NfgPerAction(hk.Module):
       self, action_embeddings: Sequence[jnp.ndarray]
   ) -> Sequence[jnp.ndarray]:
     outputs = []
-    net = attn.conv_1d(1)
+    net = attention.conv_1d(1)
     for action_embeddings_p in action_embeddings:
       outputs_p = jnp.squeeze(net(action_embeddings_p), -1)
       outputs.append(outputs_p)
@@ -270,7 +271,7 @@ class NfgPerPayoff(hk.Module):
     """Returns per-payoff outputs under all joint actions."""
     joint = _to_joint_actions(action_embeddings)  # [N, T1, ..., TN, E]
     player_to_joint = jax.vmap(
-        attn.SelfAttention(
+        attention.SelfAttention(
             num_heads=self._num_heads,
             qk_channels=self._qk_channels,
             v_channels=self._v_channels,
@@ -279,5 +280,5 @@ class NfgPerPayoff(hk.Module):
         in_axes=1,
         out_axes=1,
     )(jnp.reshape(joint, [joint.shape[0], -1, joint.shape[-1]]))
-    per_payoff = jnp.squeeze(attn.conv_1d(1)(player_to_joint), axis=-1)
+    per_payoff = jnp.squeeze(attention.conv_1d(1)(player_to_joint), axis=-1)
     return jnp.reshape(per_payoff, joint.shape[:-1])

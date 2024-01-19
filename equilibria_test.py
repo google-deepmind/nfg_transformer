@@ -14,12 +14,14 @@
 # ==============================================================================
 
 """Tests for equilibria computation."""
+
 from absl.testing import absltest
 from absl.testing import parameterized
-import equilibria
 import jax
 import jax.numpy as jnp
 import numpy as np
+
+from nfg_transformer import equilibria
 
 
 RPS = np.asarray(

@@ -17,9 +17,10 @@
 
 from absl.testing import absltest
 from absl.testing import parameterized
-import games
 import jax
 import numpy as np
+
+from nfg_transformer import games
 
 
 class GamesTest(parameterized.TestCase):

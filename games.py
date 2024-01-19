@@ -15,7 +15,6 @@
 
 """Utilities to generate classes of normal-form game payoff tensors."""
 
-
 from typing import Optional, Sequence, Tuple
 
 import jax
