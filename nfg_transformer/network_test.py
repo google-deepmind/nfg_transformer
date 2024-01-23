@@ -23,7 +23,7 @@ import jax
 import jax.numpy as jnp
 
 from nfg_transformer import games
-from nfg_transformer import nfg_transformer
+from nfg_transformer import network
 
 
 NUM_STRATEGIES = [4, 5, 6]
@@ -36,9 +36,7 @@ class NfgTransformerTest(parameterized.TestCase):
     key = jax.random.PRNGKey(42)
     random_payoff, _ = games.l2_invariant(key, num_strategies)
     f = hk.transform(
-        lambda p: nfg_transformer.NfgPerPayoff()(
-            nfg_transformer.NfgTransformer()(p)
-        )
+        lambda p: network.NfgPerPayoff()(network.NfgTransformer()(p))
     )
     params = f.init(key, random_payoff)
     payoff = f.apply(params, key, random_payoff)
@@ -49,9 +47,7 @@ class NfgTransformerTest(parameterized.TestCase):
     key = jax.random.PRNGKey(42)
     random_payoff, _ = games.l2_invariant(key, num_strategies)
     f = hk.transform(
-        lambda p: nfg_transformer.NfgPerJoint()(
-            nfg_transformer.NfgTransformer()(p)
-        )
+        lambda p: network.NfgPerJoint()(network.NfgTransformer()(p))
     )
     params = f.init(key, random_payoff)
     joint = f.apply(params, key, random_payoff)
@@ -62,9 +58,7 @@ class NfgTransformerTest(parameterized.TestCase):
     key = jax.random.PRNGKey(42)
     random_payoff, _ = games.l2_invariant(key, num_strategies)
     f = hk.transform(
-        lambda p: nfg_transformer.NfgPerAction()(
-            nfg_transformer.NfgTransformer()(p)
-        )
+        lambda p: network.NfgPerAction()(network.NfgTransformer()(p))
     )
     params = f.init(key, random_payoff)
     outputs = f.apply(params, key, random_payoff)
@@ -77,7 +71,7 @@ class NfgTransformerTest(parameterized.TestCase):
     key = hk.PRNGSequence(42)
     payoff, _ = games.l2_invariant(next(key), num_strategies)
     mask = jax.random.bernoulli(next(key), shape=num_strategies)
-    f = lambda p, m: nfg_transformer.NfgTransformer()(p, m)  # pylint: disable=unnecessary-lambda
+    f = lambda p, m: network.NfgTransformer()(p, m)  # pylint: disable=unnecessary-lambda
     f = hk.without_apply_rng(hk.transform(f))
     params = f.init(next(key), payoff, mask)
     embeddings = f.apply(params, payoff, mask)
@@ -99,7 +93,7 @@ class NfgTransformerTest(parameterized.TestCase):
     mask = mask.at[:2, :, :].set(0)
     mask = mask.at[:, :, 2:3].set(0)
 
-    f = lambda p, m: nfg_transformer.NfgTransformer()(p, m)  # pylint: disable=unnecessary-lambda
+    f = lambda p, m: network.NfgTransformer()(p, m)  # pylint: disable=unnecessary-lambda
     f = hk.without_apply_rng(hk.transform(f))
     params = f.init(next(key), payoff, mask)
     embeddings = f.apply(params, payoff, mask)

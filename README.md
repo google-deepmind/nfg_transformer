@@ -1,33 +1,66 @@
-# nfg_transformer
+# NfgTransformer: Equivariant Representation Learning for Normal-form Games
 
-TODO(b/320462031): Add a description for your new project, explain what is
-being released here, etc... Additional, the following sections are normally
-expected for all releases. Feel free to add additional sections if appropriate
-for your project.
+This repository provides a reference implementation of the network architecture
+described in the ICLR 2024 paper
+[NfgTransformer: Equivariant Representation Learning for Normal-form Games](https://openreview.net/forum?id=4YESQqIys7).
 
 ## Installation
 
-Write instructions for how the user should install your code. The instructions
-should ideally be valid when copy-pasted. You can combine this with the Usage
-section if there's no separate installation step.
+No installation is needed when interacting with the `run_experiment.ipynb`
+notebook as it installs this package from GitHub sources directly.
+
+For local installation, following the steps below:
+
+Clone the repository:
+
+`git clone https://github.com/google-deepmind/nfg_transformer.git`
+
+Switch to the project directory:
+
+`cd nfg_transformer`
+
+Install dependencies:
+
+`pip install -e .`
+
+You can then run the tests to verify that all modules are working as intended
+(requires `pytest` to be installed):
+
+`python -m pytest nfg_transformer/*test.py`
 
 ## Usage
 
-Write example usage of your code. The instructions should ideally be valid when
-copy-pasted, and will be used by your technical reviewer to verify that your
-package functions correctly.
+The NfgTransformer offers general-purpose equivariant representation learning of
+normal-form games and can be used for equilibrium solving, max-deviation gain
+estimation and payoff prediction of n-player general-sum normal-form games.
+
+`run_experiment.ipynb` implements a self-contained supervised learning
+experiment for all these tasks and we recommend following along the notebook.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/google-deepmind/nfg_transformer/blob/master/run_experiment.ipynb)
 
 ## Citing this work
 
-Add citation details here, usually a pastable BibTeX snippet.
+To cite this work:
+
+```bibtex
+@inproceedings{
+anonymous2024nfgtransformer,
+  title={NfgTransformer: Equivariant Representation Learning for Normal-form Games},
+  author={Anonymous},
+  booktitle={The Twelfth International Conference on Learning Representations},
+  year={2024},
+  url={https://openreview.net/forum?id=4YESQqIys7}
+}
+```
 
 ## License and disclaimer
 
 Copyright 2024 DeepMind Technologies Limited
 
-All software is licensed under the Apache License, Version 2.0 (Apache 2.0);
-you may not use this file except in compliance with the Apache 2.0 license.
-You may obtain a copy of the Apache 2.0 license at:
+All software is licensed under the Apache License, Version 2.0 (Apache 2.0); you
+may not use this file except in compliance with the Apache 2.0 license. You may
+obtain a copy of the Apache 2.0 license at:
 https://www.apache.org/licenses/LICENSE-2.0
 
 All other materials are licensed under the Creative Commons Attribution 4.0
