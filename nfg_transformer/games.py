@@ -124,7 +124,7 @@ def _random_joint_mask(key, num_strategies, p: Optional[float] = None):
     p = jax.random.uniform(key_p, shape=())
   mask = jax.random.bernoulli(key_m, p=p, shape=num_strategies)
   # Ensures that at least one joint-action is observed.
-  mask = mask.at[((0,) * len(num_strategies))].set(1)
+  mask = mask.at[((0,) * len(num_strategies))].set(True)
   # Ensures that if payoffs (i, j) is unobserved, payoffs (j, i) isn't either.
   tril_mask = jnp.tril(mask)
   mask = jnp.logical_or(tril_mask, tril_mask.T)

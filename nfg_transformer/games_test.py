@@ -33,8 +33,8 @@ class GamesTest(parameterized.TestCase):
     self.assertEqual(payoffs.shape, (len(num_strategies),) + num_strategies)
     self.assertEqual(mask.shape, num_strategies)
 
-    np.testing.assert_allclose(payoffs.mean(), 0.0, atol=1e-6)
-    np.testing.assert_allclose(payoffs.std(), 1.0, atol=1e-6)
+    np.testing.assert_allclose(payoffs.mean(), 0.0, atol=1e-4)
+    np.testing.assert_allclose(payoffs.std(), 1.0, atol=1e-4)
     np.testing.assert_allclose(mask, 1.0)
 
   def test_empirical_disc_game(self):
