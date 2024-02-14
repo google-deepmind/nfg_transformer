@@ -37,7 +37,7 @@ estimation and payoff prediction of n-player general-sum normal-form games.
 `run_experiment.ipynb` implements a self-contained supervised learning
 experiment for all these tasks and we recommend following along the notebook.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/google-deepmind/nfg_transformer/blob/master/run_experiment.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/google-deepmind/nfg_transformer/blob/main/run_experiment.ipynb)
 
 ## Citing this work
 
@@ -45,12 +45,12 @@ To cite this work:
 
 ```bibtex
 @inproceedings{
-anonymous2024nfgtransformer,
-  title={NfgTransformer: Equivariant Representation Learning for Normal-form Games},
-  author={Anonymous},
-  booktitle={The Twelfth International Conference on Learning Representations},
-  year={2024},
-  url={https://openreview.net/forum?id=4YESQqIys7}
+liu2024nfgtransformer,
+title={NfgTransformer: Equivariant Representation Learning for Normal-form Games},
+author={Siqi Liu and Luke Marris and Georgios Piliouras and Ian Gemp and Nicolas Heess},
+booktitle={The Twelfth International Conference on Learning Representations},
+year={2024},
+url={https://openreview.net/forum?id=4YESQqIys7}
 }
 ```
 
